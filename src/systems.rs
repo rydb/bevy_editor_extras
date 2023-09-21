@@ -1,5 +1,4 @@
 
-use std::f32::consts::PI;
 use bevy_mod_raycast::RaycastSource;
 
 use bevy_component_extras::components::*;
@@ -10,13 +9,10 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::RigidBody;
 use bevy::reflect::TypePath;
 
-//use bevy_flycam::prelude::*;
-
-use super::components::*;
 
 // Update our `RaycastSource` with the current cursor position every frame.
-pub fn update_raycast_with_cursor(
-    mut query: Query<&mut RaycastSource<Selectable>>,
+pub fn update_raycast_with_cursor<T: Component + TypePath>(
+    mut query: Query<&mut RaycastSource<T>>,
     q_windows: Query<&Window, With<PrimaryWindow>>
 
 ) {
@@ -118,40 +114,9 @@ pub fn _rigid_body_editor(
     }
 }
 
-/// take things that have been selected, and draw a gizmo over them to represent that
-// pub fn visualize_selected_things(
-//     mut gizmos: Gizmos,
-//     selected_things_querry: Query<(&GlobalTransform, &Handle<Mesh>), With<Selected>>,
-//     meshes: Res<Assets<Mesh>>,
-// ) {
-//     // padding to make wireframe not hug meshes too tightly
-//     let wireframe_padding = 0.01;
-//     for (trans, mesh_handle) in selected_things_querry.iter() {
-//         if let Some(mesh) = meshes.get(mesh_handle) {
-//             //println!("got mesh from mesh handle");
-//             // get bounding box for cuboid wirefram ebased on mesh "aabb"
-//             if let Some(aabb) = mesh.compute_aabb() {
-//                 println!("mesh aabb: {:#?}", aabb);
-//                 gizmos.cuboid(
-//                     Transform::from_translation(trans.translation()).with_scale(Vec3::new(
-//                         (aabb.half_extents.x * 2.0) + wireframe_padding,
-//                         (aabb.half_extents.y * 2.0) + wireframe_padding,
-//                         (aabb.half_extents.y * 2.0) + wireframe_padding,
-//                     )
-//                     ),
-//                     Color::GREEN,
-//                 );
-//             } else {
-//                 println!("unable to compute mesh aabb")
-//             }
-//         }
-//     }
-
-// }
-
 /// take models flagged with "held", and have their position follow mouse + raycast point
-pub fn hover_mesh_at_mouse(
-    raycast_sources: Query<(&RaycastSource<Selectable>, &SelectionMode)>,
+pub fn hover_mesh_at_mouse<T: Component + TypePath>(
+    raycast_sources: Query<(&RaycastSource<T>, &SelectionMode)>,
     held_entities: Query<(Entity, &Transform, &Held)>,
     mut commands: Commands,
 ) {
@@ -174,11 +139,11 @@ pub fn hover_mesh_at_mouse(
 }
 
 /// checks for selectable things, and then selects/deselects them on various criteria
-pub fn manage_selection_behaviour(    
-    raycast_sources: Query<(&RaycastSource<Selectable>, &SelectionMode)>,
+pub fn manage_selection_behaviour<T: Component + TypePath>(    
+    raycast_sources: Query<(&RaycastSource<T>, &SelectionMode)>,
     buttons: Res<Input<MouseButton>>,
     selected_meshes: Query<&Selected>,
-    selectable_meshes: Query<&Selectable>,
+    selectable_meshes: Query<&T>,
     mut commands: Commands,
     widget_querry: Query<Entity, With<Widget>>,
 
@@ -227,17 +192,10 @@ pub fn manage_selection_behaviour(
                 }
 
             }
-        
-        //println!("clicked on {:#?}, at {:#?}", e, intersection.position());
-                    // attempt to fetch color from model
-            // use model ligting on and off as stand in for being selected.
             
         }
     }
 }
-// pub fn spawn_raycast_from_camera(mut comands: Commands) {
-
-// }
 
 /// finds cameras marked with debug, and attaches selector raycast to them.
 pub fn attach_selector_to_cam<T: Component + TypePath> (
@@ -248,32 +206,12 @@ pub fn attach_selector_to_cam<T: Component + TypePath> (
         // !!!if multiple debug cameras(multiple people editing a scene at once) ever gets added, this will panic!!!
         let debug_cam = debug_cams.single();
 
-        commands.insert_resource(RaycastPluginState::<Selectable>::default().with_debug_cursor());
+        commands.insert_resource(RaycastPluginState::<T>::default().with_debug_cursor());
         commands.entity(debug_cam).insert(
             (
-            RaycastSource::<Selectable>::new(),
+            RaycastSource::<T>::new(),
             SelectionMode::default(),
             )
         );
     }
 }
-
-
-// ///spawns camera for debug
-// pub fn spawn_debug_cam(mut commands:Commands) {
-//     commands.insert_resource(RaycastPluginState::<Selectable>::default().with_debug_cursor());
-//     commands.spawn(
-//         (
-// Camera3dBundle {
-//             transform: Transform::from_xyz(0.0, 4.0, 20.0).with_rotation(Quat::from_rotation_z(PI / 2.0)),
-//             ..default()
-//         },
-//         FlyCam,
-//         RaycastSource::<Selectable>::new(),
-//         SelectionMode::default(),
-
-//     )
-//     )
-//     ;
-// }
-

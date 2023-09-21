@@ -1,13 +1,13 @@
-use bevy::{prelude::*, reflect::TypePath};
+use bevy::prelude::*;
 use std::f32::consts::PI;
-use crate::components::*;
 use super::gizmo_material::GizmoMaterial;
 use bevy_mod_raycast::RaycastSource;
 use bevy_window::PrimaryWindow;
-/// marker that states: WHICH transform widget entity has its transform based on. 
+
 use crate::transform_widget::components::*;
 use bevy_component_extras::components::*;
-use bevy_mod_raycast::RaycastPluginState;
+
+
 // despawn transform widgets around things that have been de selected
 pub fn widget_despawn_for_deselected(
     widgets_to_despawn: Query<(Entity, &TransformWidgetMarker), Without<Selected>>,
@@ -30,13 +30,8 @@ pub fn widget_spawn_for_selected (
     mut gizmo_material: ResMut<Assets<GizmoMaterial>>,
 
 ) {
-    //println!("transform widget existence called");
     //spawn transform widgets on selected entities
     for (e, trans,..) in models_without_widget.iter() {
-        
-
-        
-
         let cube_size = 0.3;
 
         let dist = 1.0;
@@ -219,97 +214,75 @@ pub fn manage_tugs(
     // how much pull of tugs should be reduced
     let tug_sensitivity_divisor = 20.0;
     // made to crash on multiple cameras on purpose. this will need to be refactored when multiple cams exist.
-    if let Ok(selector_cam_trans) = transform_immutable_querry.get(raycast_sources.single().0) {
-        for (e, tug) in selected_tugs.iter() {
-
-            if let Some(mouse_pos) = q_windows.single().cursor_position() {
-                let mouse_inteaction = LastMouseInteraction {
-                    mouse_pos: mouse_pos,
-                    time_of_interaction: time.delta_seconds_f64()
-                };
-                let mut last_mouse_interaction = LastMouseInteraction::default();
-                if let Ok(mouse_check) = lastmouse_interactions.get(e) {
-                    last_mouse_interaction = *mouse_check
-                } 
-                let mouse_delta = last_mouse_interaction.mouse_pos - mouse_inteaction.mouse_pos;
-        
-            if buttons.pressed(MouseButton::Left) && last_mouse_interaction.time_of_interaction > 0.0 {
-                //tug.translation.y += mouse_delta.y / 20.0; //* 2.0;
-                if let Some(root_ancestor) = parent_querry.iter_ancestors(e).last() {
-                    if let Ok(transform_widget_flag) = transform_widget_querry.get(root_ancestor) {
-                        if let Ok(mut widget_root_transform) = transform_querry.get_mut(transform_widget_flag.bound_entity) {
-                            //let widget_root_transform = *bound_model_transform;
-                            let (cam_x, cam_y, cam_z) = (
-                                (widget_root_transform.translation.x - selector_cam_trans.translation.x),
-                                (widget_root_transform.translation.y - selector_cam_trans.translation.y),
-                                (widget_root_transform.translation.z - selector_cam_trans.translation.z)); 
-                            let (cam_x_rot, cam_y_rot, cam_z_rot) = selector_cam_trans.rotation.to_euler(EulerRot::XYZ);
-                            
-                            // math for gizmos
-                            
-                            widget_root_transform.translation = Vec3::new(
-                                widget_root_transform.translation.x + (
-                                    tug.pull.x * 
-                                    (
-                                        ((-mouse_delta.x * (1.0 - (cam_y_rot / (PI / 2.0)))) + ((-mouse_delta.y) * (-cam_y_rot / (PI / 2.0))))  / tug_sensitivity_divisor
-                                    )) * (cam_z / cam_z.abs())  
-                                    //* (cam_x / cam_x.abs()) ,
-                                    ,
-                                widget_root_transform.translation.y + (tug.pull.y * (mouse_delta.y / tug_sensitivity_divisor))
-                                    //(cam_y / cam_y.abs()), //* 2.0;
-                                    ,
-                                widget_root_transform.translation.z + 
-                                (tug.pull.z * 
-                                    (
-                                        ((-mouse_delta.y * (1.0 - (cam_y_rot / (PI / 2.0)))) + ((-mouse_delta.x) * (cam_y_rot / (PI / 2.0))))  / tug_sensitivity_divisor
-                                    )
-                                )
-                                * (cam_x / cam_x.abs())/* (cam_y_rot / cam_y_rot.abs())*/
-                                    
-                            );
-                            //println!("mouse interaction last {:#}", last_mouse_interaction.mouse_pos);
-                            //println!("mouse interaction current {:#}", last_mouse_interaction.mouse_pos);
-                            //println!("mouse delta is {:#?}", mouse_delta);
-                            
-                            //println!("widget rotation is now {:#?}", widget_root_transform.rotation);
-                            //println!("mouse drag is {:#?}", mouse_delta);
-                            println!("camera y rot is {:#?}", cam_y_rot);
-                            println!("mouse delta y multipler is {:#?}", (1.0 - (cam_y_rot.abs() / (PI / 2.0))));
-                            println!("mouse delta x multipler is {:#?}", (cam_y_rot.abs() / (PI / 2.0)));
-                            println!("x alignment multiplier is {:#?}", cam_x / cam_x.abs());
-                            println!("y alignment multiplier is {:#?}", cam_y / cam_y.abs());
-                            println!("z alignment multiplier is {:#?}", cam_z / cam_z.abs());
-                            //println!("mouse drag is modified to be : {:#?}", ((-mouse_delta.y * (cam_y_rot.abs() % PI)) + ((-mouse_delta.x) * (cam_y_rot.abs() / PI)))  / tug_sensitivity_divisor);
-                            //println!("camera rotation y is now {:#?}", selector_cam_trans.rotation.to_euler(EulerRot::XYZ));
-                            //println!("camera and widget rotation difference is {:#?}", widget_root_transform.rotation - selector_cam_trans.rotation)
-                            //println!("widget translation is now {:#?}", widget_root_transform.translation);
-                           // println!("camera translation is now {:#?}", selector_cam_trans.translation);
-                            //println!("camera dist from widget is {:#?}", widget_root_transform.translation - selector_cam_trans.translation);
-                            
-                            
-                            //println!("cam z orientation is {:#?}", (cam_x / cam_x.abs()));
-                            //println!("cam z is {:#?}", cam_z);
-                            //println!("inserting transform for x tug at time{:#?}", time.delta());
-                            // commands.entity(transform_widget_flag.bound_entity).insert(
-                            //     Transform::from_xyz(
-                            //         widget_root_transform.translation.x + (tug.pull.x * (-mouse_delta.x / tug_sensitivity_divisor)),
-                            //         widget_root_transform.translation.y + (tug.pull.y * (mouse_delta.y / tug_sensitivity_divisor)), //* 2.0;
-                            //         widget_root_transform.translation.z + (tug.pull.z * (-mouse_delta.y / tug_sensitivity_divisor))
-                            //     )
-                    
-                            //     );
-                            
-                        }
-                    }
+    for (cam_entity, ..) in raycast_sources.iter() {
+        if let Ok(selector_cam_trans) = transform_immutable_querry.get(cam_entity) {
+            for (e, tug) in selected_tugs.iter() {
     
-                }
-            }
+                if let Some(mouse_pos) = q_windows.single().cursor_position() {
+                    let mouse_inteaction = LastMouseInteraction {
+                        mouse_pos: mouse_pos,
+                        time_of_interaction: time.delta_seconds_f64()
+                    };
+                    let mut last_mouse_interaction = LastMouseInteraction::default();
+                    if let Ok(mouse_check) = lastmouse_interactions.get(e) {
+                        last_mouse_interaction = *mouse_check
+                    } 
+                    let mouse_delta = last_mouse_interaction.mouse_pos - mouse_inteaction.mouse_pos;
+            
+                if buttons.pressed(MouseButton::Left) && last_mouse_interaction.time_of_interaction > 0.0 {
+                    //tug.translation.y += mouse_delta.y / 20.0; //* 2.0;
+                    if let Some(root_ancestor) = parent_querry.iter_ancestors(e).last() {
+                        if let Ok(transform_widget_flag) = transform_widget_querry.get(root_ancestor) {
+                            if let Ok(mut widget_root_transform) = transform_querry.get_mut(transform_widget_flag.bound_entity) {
+                                //let widget_root_transform = *bound_model_transform;
+                                let (cam_x, cam_y, cam_z) = (
+                                    (widget_root_transform.translation.x - selector_cam_trans.translation.x),
+                                    (widget_root_transform.translation.y - selector_cam_trans.translation.y),
+                                    (widget_root_transform.translation.z - selector_cam_trans.translation.z)); 
+                                let (cam_x_rot, cam_y_rot, cam_z_rot) = selector_cam_trans.rotation.to_euler(EulerRot::XYZ);
+                                
+                                // math for gizmos
+                                
+                                widget_root_transform.translation = Vec3::new(
+                                    widget_root_transform.translation.x + (
+                                        tug.pull.x * 
+                                        (
+                                            ((-mouse_delta.x * (1.0 - (cam_y_rot / (PI / 2.0)))) + ((-mouse_delta.y) * (-cam_y_rot / (PI / 2.0))))  / tug_sensitivity_divisor
+                                        )) * (cam_z / cam_z.abs())  
+                                        //* (cam_x / cam_x.abs()) ,
+                                        ,
+                                    widget_root_transform.translation.y + (tug.pull.y * (mouse_delta.y / tug_sensitivity_divisor))
+                                        //(cam_y / cam_y.abs()), //* 2.0;
+                                        ,
+                                    widget_root_transform.translation.z + 
+                                    (tug.pull.z * 
+                                        (
+                                            ((-mouse_delta.y * (1.0 - (cam_y_rot / (PI / 2.0)))) + ((-mouse_delta.x) * (cam_y_rot / (PI / 2.0))))  / tug_sensitivity_divisor
+                                        )
+                                    )
+                                    * (cam_x / cam_x.abs())/* (cam_y_rot / cam_y_rot.abs())*/
+                                        
+                                );
+                                println!("camera y rot is {:#?}", cam_y_rot);
+                                println!("mouse delta y multipler is {:#?}", (1.0 - (cam_y_rot.abs() / (PI / 2.0))));
+                                println!("mouse delta x multipler is {:#?}", (cam_y_rot.abs() / (PI / 2.0)));
+                                println!("x alignment multiplier is {:#?}", cam_x / cam_x.abs());
+                                println!("y alignment multiplier is {:#?}", cam_y / cam_y.abs());
+                                println!("z alignment multiplier is {:#?}", cam_z / cam_z.abs());
+                                
+                            }
+                        }
         
-            // register this mouse interaction as the last one thats happened.
-            commands.entity(e).insert(mouse_inteaction);
-            } 
+                    }
+                }
+            
+                // register this mouse interaction as the last one thats happened.
+                commands.entity(e).insert(mouse_inteaction);
+                } 
+            }
         }
     }
+
 
 }
 
@@ -387,23 +360,3 @@ pub fn transform_widget_behaviour (
         }
     }
 }
-
-
-
-// pub fn spawn_debug_cam(mut commands:Commands) {
-//     commands.insert_resource(RaycastPluginState::<Selectable>::default().with_debug_cursor());
-//     commands.spawn(
-//         (
-// Camera3dBundle {
-//             transform: Transform::from_xyz(5.0, 4.0, 5.0).with_rotation(Quat::from_rotation_y(PI / 2.5)),
-//             ..default()
-//         },
-//         FlyCam,
-//         RaycastSource::<Selectable>::new(),
-//         SelectionMode::default(),
-//         Viewer{offset: Vec3::new(5.0, 5.0, 5.0)},
-
-//     )
-//     )
-//     ;
-// }

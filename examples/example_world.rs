@@ -1,26 +1,18 @@
-use bevy::{prelude::*};
+use bevy::prelude::*;
+use bevy_component_extras::components::MakeSelectableBundle;
 use bevy_editor_extras::plugins::*;
 
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_mod_raycast::{
-    DefaultRaycastingPlugin,
-    RaycastSource,
-};
-//use editor_extras::plugins::EditorPlugin;
-//use crate::body::cube::components::*;
 fn main() {
     App::new()
         .add_plugins(
             (
-                DefaultPlugins, //< --- bevy needs these in order to run
+                DefaultPlugins, 
                 EditorPlugin,                
             )
         )
         .add_systems(Startup, spawn_world)
         .run();
 }
-
-//const NEW_SCENE_FILE_PATH: &str = "scenes/load_scene_example-new.scn.ron";
 
 fn spawn_world(
     mut commands: Commands,
@@ -34,12 +26,16 @@ fn spawn_world(
         ..default()
     });
     // cube
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-        transform: Transform::from_xyz(0.0, 0.5, 0.0),
-        ..default()
-    });
+    commands.spawn(
+    (
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
+            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+            ..default()
+        },
+        MakeSelectableBundle::default(),
+    ));
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -51,8 +47,8 @@ fn spawn_world(
         ..default()
     });
     // camera
-    // commands.spawn(Camera3dBundle {
-    //     transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-    //     ..default()
-    // });
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
 }

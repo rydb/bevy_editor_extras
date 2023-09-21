@@ -5,15 +5,15 @@ use egui::Align2;
 
 use bevy_component_extras::components::*;
 use bevy_mod_raycast::RaycastSource;
-//use crate::extra_meshes::ramp::*;
+
 /// ui for build menu
 pub fn build_menu(
     //world: &mut World,
     //mut disabled: Local<bool>,
     mut commands: Commands,
     raycast_sources: Query<Entity, With<RaycastSource<Selectable>>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
+    // mut materials: ResMut<Assets<StandardMaterial>>,
     egui_context_query: Query<&mut EguiContext, With<PrimaryWindow>>,
 ){
     // let mut egui_context = world
@@ -24,7 +24,7 @@ pub fn build_menu(
 
     //println!("build menu test");
     let mut egui_context = egui_context_query.single().clone();
-    let raycast_camera = raycast_sources.single();
+    //let raycast_camera = raycast_sources.single();
     let menu_name = "Build Menu";
     egui::Window::new(menu_name)
     .anchor(Align2::LEFT_BOTTOM, (0.0, -100.0))
@@ -35,7 +35,7 @@ pub fn build_menu(
             if ui.button("Right Triangle Prism").clicked() {
                 println!("click spot where to spawn prism");
                 //*selector_mode = SelectionMode::Clicking;
-                commands.entity(raycast_camera).insert(SelectionMode::Clicking);
+                //commands.entity(raycast_camera).insert(SelectionMode::Clicking);
                 // commands.spawn(
                 //     (
                 //     PbrBundle {
@@ -68,18 +68,6 @@ pub fn inspector_ui(
     world: &mut World,
     //mut disabled: Local<bool>,
 ) {
-    // let space_pressed = world
-    //     .resource::<Input<KeyCode>>()
-    //     .just_pressed(KeyCode::Space);
-    // if space_pressed {
-    //     *disabled = !*disabled;
-    // }
-    // if *disabled {
-    //     return;
-    // }
-    //println!("inspector ui test");
-
-    // }
     let mut egui_context = world
         .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
         .single(world)

@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 use super::{systems::*, gizmo_material::{GizmoMaterial, self}};
-use crate::components::*;
 use bevy_component_extras::components::*;
 //use crate::editor::systems::SelectedForEdit;
 //use gizmo_material::GizmoMaterial;
