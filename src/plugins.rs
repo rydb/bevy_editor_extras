@@ -8,7 +8,7 @@ use bevy_component_extras::components::*;
 use crate::transform_widget::plugins::TransformWidgetPlugin;
 use crate::ui::*;
 use super::systems::*;
-
+use bevy_ui_extras::systems::*;
 pub struct SelecterPlugin;
 
 
@@ -44,7 +44,7 @@ impl Plugin for EditorPlugin {
             WorldInspectorPlugin::new(),
             )
         )
-        .add_systems(Update, (inspector_ui, build_menu))
+        .add_systems(Update, (visualize_sidepanel_for::<Selected>, build_menu))
         ;
     }
 }

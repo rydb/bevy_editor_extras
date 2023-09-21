@@ -61,28 +61,25 @@ pub fn build_menu(
 }
 
 
-/// code taken from: https://github.com/jakobhellermann/bevy-inspector-egui/blob/main/crates/bevy-inspector-egui/examples/basic/resource_inspector_manual.rs
-/// shows selected parts in side ui 
+// pub fn inspector_ui(
+//     world: &mut World,
+//     //mut disabled: Local<bool>,
+// ) {
+//     let mut egui_context = world
+//         .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
+//         .single(world)
+//         .clone();
 
-pub fn inspector_ui(
-    world: &mut World,
-    //mut disabled: Local<bool>,
-) {
-    let mut egui_context = world
-        .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
-        .single(world)
-        .clone();
+//     let menu_name = "Selected Models";
 
-    let menu_name = "Selected Models";
-
-    // the usual `ResourceInspector` code
-    egui::SidePanel::new(egui::panel::Side::Right,menu_name).show(egui_context.get_mut(), |ui| {
-        egui::ScrollArea::vertical().show(ui, |ui| {
-            ui.heading(menu_name);
+//     // the usual `ResourceInspector` code
+//     egui::SidePanel::new(egui::panel::Side::Right,menu_name).show(egui_context.get_mut(), |ui| {
+//         egui::ScrollArea::vertical().show(ui, |ui| {
+//             ui.heading(menu_name);
             
-            bevy_inspector_egui::bevy_inspector::ui_for_world_entities_filtered::<With<Selected>>(world, ui, true);
+//             bevy_inspector_egui::bevy_inspector::ui_for_world_entities_filtered::<With<Selected>>(world, ui, true);
 
-            ui.separator();
-        });
-    });
-}
+//             ui.separator();
+//         });
+//     });
+// }
