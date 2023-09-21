@@ -44,7 +44,7 @@ impl Plugin for EditorPlugin {
             WorldInspectorPlugin::new(),
             )
         )
-        .add_systems(Update, (visualize_sidepanel_for::<Selected>, build_menu))
+        .add_systems(Update, (visualize_right_sidepanel_for::<Selected>, build_menu))
         ;
     }
 }
